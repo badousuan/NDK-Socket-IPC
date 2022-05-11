@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 // Android log function wrappers
-static const char* kTAG = "ClientIPC";
+static const char* kTAG = "meeeeClientIPC";
 #define LOGI(...) \
   ((void)__android_log_print(ANDROID_LOG_INFO, kTAG, __VA_ARGS__))
 #define LOGW(...) \

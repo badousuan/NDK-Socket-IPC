@@ -26,7 +26,7 @@ void setupClient(void) {
 		LOGE("socket: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-
+    // 抽象socket通过sun_path进行匹配，sun_path要以\0开头
 	// NDK needs abstract namespace by leading with '\0'
 	// Ya I was like WTF! too... http://www.toptip.ca/2013/01/unix-domain-socket-with-abstract-socket.html?m=1
 	// Note you don't need to unlink() the socket then
@@ -38,7 +38,7 @@ void setupClient(void) {
 	server_addr.sun_family = AF_UNIX; // Unix Domain instead of AF_INET IP domain
 	strncpy(server_addr.sun_path, socket_name, sizeof(server_addr.sun_path) - 1); // 108 char max
 
-	// Assuming only one init connection for demo
+	// Assuming only one init connection for demo，服务端需要先监听起来
 	int ret = connect(data_socket, (const struct sockaddr *) &server_addr, sizeof(struct sockaddr_un));
 	if (ret < 0) {
 		LOGE("connect: %s", strerror(errno));
@@ -158,7 +158,7 @@ int32_t handle_input(struct android_app* app, AInputEvent* event) {
 					return 1;
 				}
 
-				LOGI("X: %f  --   Y: %f", x, y);
+				LOGI("X: %f  --   Y: %f  w:%f,h:%f", x, y,h_width,h_height);
 
 				// Sends color depending on region
 				if (x < h_width / 3) {

@@ -61,11 +61,12 @@ void* setupServer(void* na) {
 	// Would be better to refactor this for robustness
 	for (;;) {
 
-		// Blocks until sent data
-		ret = AHardwareBuffer_recvHandleFromUnixSocket(data_socket, &h_buffer);
+		// Blocks until sent data，从socket里读取AHardwareBuffer的句柄
+		ret = AHardwareBuffer_recvHandleFromUnixSocket(data_socket, &h_buffer);//阻塞式,等待AHardwareBuffer_sendHandleToUnixSocket
 		if (ret != 0) {
 			LOGE("Failed to AHardwareBuffer_recvHandleFromUnixSocket");
 		}
+		LOGE("success to AHardwareBuffer_recvHandleFromUnixSocket:%p",h_buffer);
 
 	}
 	close(data_socket);
@@ -81,7 +82,7 @@ void setWindowWithBuffer() {
 	void* shared_buffer;
 
 	ANativeWindow_acquire(native_window);
-	ANativeWindow_Buffer buffer;
+	ANativeWindow_Buffer buffer; // window的buffer
 	if (ANativeWindow_lock(native_window, &buffer, nullptr) < 0) {
 		LOGE("Failed to lock native window");
 		return;
@@ -102,7 +103,7 @@ void setWindowWithBuffer() {
 	if (ret != 0) {
 		LOGE("Failed to AHardwareBuffer_lock");
 	}
-
+	//将远端进程的AHardwareBuffer内容拷贝到ANativeWindow
 	// assuming format was set to 4 bytes per pixel and not 565 mode
 	memcpy(buffer.bits, shared_buffer, (buffer.height * buffer.stride * 4));
 
@@ -126,7 +127,7 @@ void handle_cmd(android_app* app, int32_t cmd) {
 											 ANativeWindow_getHeight(app->window),
 											 ANativeWindow_getWidth(app->window),
 											 WINDOW_FORMAT_RGBX_8888);
-
+			LOGE("APP_CMD_INIT_WINDOW:%p setWindowWithBuffer",h_buffer);
 			// Only can set window with screen is active
 			if (h_buffer != nullptr) {
 				setWindowWithBuffer();
